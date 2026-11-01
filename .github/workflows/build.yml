@@ -3,6 +3,8 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,3 +23,9 @@ jobs:
         with:
           name: p3-launcher
           path: p3-launcher.apk
+      - name: Publish APK as a Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
+          gh release create latest p3-launcher.apk --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "P3 Launcher (latest build)" --notes "Debug APK built from commit $GITHUB_SHA"
